@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title></title>
+	<style>
+		body {
+			font-family: 'Arial', sans-serif;
+			margin: 0;
+			padding: 0 20px;
+			background-color: #f4f4f4;
+			line-height: 1.5;
+		}
+		h1 {
+			background-color: #006699;
+			color: white;
+			padding: 20px;
+			text-align: center;
+		}
+		h3 {
+			color: #006699;
+			cursor: pointer;
+		}
+		section {
+			background-color: #fff;
+			padding: 20px;
+			margin: 20px 0;
+			border-radius: 8px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		code {
+			background-color: #e8e8e8;
+			display: inline;
+			padding: 8px;
+			border-radius: 5px;
+			margin-bottom: 15px;
+		}
+		ul, ol {
+			margin: 10px 0;
+			padding-left: 20px;
+		}
+		select {
+			margin: 10px;
+			padding: 5px;
+		}
+		.code, .method-example code {
+			background-color: #e8e8e8;
+			padding: 10px;
+			border-radius: 5px;
+			display: block;
+			margin-bottom: 15px;
+			width: -webkit-fill-available;
+		}
+		.collapsible {
+			cursor: pointer;
+			padding: 10px;
+			background-color: #006699;
+			color: white;
+			border: none;
+			outline: none;
+			text-align: left;
+			font-size: 16px;
+			width: 100%;
+			border-radius: 5px;
+		}
+		.content {
+			padding: 10px 30px;
+			margin-top: 10px;
+			display: none;
+			overflow: hidden;
+			background-color: #f4f4f4;
+			border-radius: 5px;
+		}
+		footer {
+			text-align: center;
+			padding: 20px;
+			background-color: #006699;
+			color: white;
+			margin: 20px 0;
+		}
+		.method-title {
+			font-weight: bold;
+			font-size: 1em;
+			color: #006699;
+			margin-top:20px;
+		}
+		.method-desc {
+			margin: 5px 0;
+		}
+		.method-example {
+			background-color: #f0f0f0;
+			border-radius: 5px;
+			margin: 10px 0;
+		}
+	</style>
+	<script>
+		const defaultLanguage = 'es';
+		function changeLanguage(element,language=null) {
+			var lang = (language === null)?element.value:language;
+			var label = document.querySelector("label[for='language-select']");
+			var option1 = element.querySelector("option[value='es']");
+			var option2 = element.querySelector("option[value='en']");
+			var sections = document.querySelectorAll("[data-lang]");
+			if (lang === "es") {
+				document.title = 'EnvDebuggerPHP - Documentación Oficial';
+				label.textContent = "Idioma:";
+				option1.textContent = "Español";
+				option2.textContent = "Inglés";
+				option1.selected = true; 
+				option2.selected = false;
+			} else if (lang === "en") {
+				document.title = 'EnvDebuggerPHP - Official Documentation';
+				label.textContent = "Language:";
+				option1.textContent = "Spanish";
+				option2.textContent = "English";
+				option1.selected = false; 
+				option2.selected = true;
+			}
+			sections.forEach(function(section) {
+				if (section.getAttribute("data-lang") === lang) {
+					section.style.display = "block";
+				} else {
+					section.style.display = "none";
+				}
+			});
+		}
+		document.addEventListener("DOMContentLoaded", function() {
+			var coll = document.getElementsByClassName("collapsible");
+			for (var i = 0; i < coll.length; i++) {
+				coll[i].addEventListener("click", function() {
+					this.classList.toggle("active");
+					var content = this.nextElementSibling;
+					if (content.style.display === "block") {
+						content.style.display = "none";
+					} else {
+						content.style.display = "block";
+					}
+				});
+			}
+			var langSelect = document.getElementById("language-select");
+			langSelect.addEventListener("change", function() {
+				changeLanguage(langSelect);
+			});
+			changeLanguage(langSelect,defaultLanguage);
+		});
+	</script>
+</head>
+<body>
+	<h1 data-lang="es" style="display: block;">EnvDebuggerPHP - Guía de Uso</h1>
+	<h1 data-lang="en" style="display: none;">EnvDebuggerPHP - User Guide</h1>
+	<div style="text-align: right;">
+		<label for="language-select">Idioma:</label>
+		<select id="language-select">
+			<option value="es">Español</option>
+			<option value="en">English</option>
+		</select>
+	</div>
+	<div data-lang="es" style="display: block;">
+		<section>
+			<button class="collapsible">Descripción</button>
+			<div class="content">
+				<p><strong>EnvDebuggerPHP</strong> es una librería diseñada para facilitar la depuración y manejo de errores en PHP en diferentes entornos de una aplicación como son desarrollo, pruebas y producción. Además, te permite identificar errores y rastrear variables de manera eficiente.</p>
+				<p>Cada entorno será manejado por una clase para facilitar el manejo de errores y la implementación:</p>
+				<ul>
+					<li>
+						<strong>development</strong>
+						<p>Development o entorno de desarrollo es la etapa principal de toda aplicación, donde se realiza la codificación del proyecto.</p>
+						<p>La clase asociada es <code>DEV::</code></p>
+					</li>
+					<li>
+						<strong>testing</strong>
+						<p>Testing o entorno de pruebas es la siguiente etapa después de la codificación, donde se realizan distintos tipos de pruebas antes de enviarlo a producción.</p>
+						<p>La clase asociada es <code>TEST::</code></p>
+					</li>
+					<li>
+						<strong>production</strong>
+						<p>Production o entorno de producción es la etapa final, lo que verá el cliente final. No tiene una clase asociada, ya que la librería no trabaja en este entorno para evitar la salida de datos no deseados.</p>
+					</li>
+					<li>
+						<strong>debug</strong>
+						<p>Debug no es en sí un entorno, pero ha sido creado para quienes prefieren no separar los entornos de desarrollo y pruebas, permitiendo probar el código mientras se codifica y luego enviarlo a producción.</p>
+						<p>La clase asociada es <code>DEBUG::</code></p>
+					</li>
+				</ul> 
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Características</button>
+			<div class="content">
+				<ul>
+					<li>Manejo personalizado de errores según el entorno.</li>
+					<li>Mensajes y logs detallados dependiendo del entorno.</li>
+					<li>Compatible con JSON, XML, TXT y PHP para configuración de entornos.</li>
+				</ul>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Instalación</button>
+			<div class="content">
+				<ol>
+					<li>Descarga o clona el repositorio desde <a href="#">EnvDebuggerPHP</a>.</li>
+					<li>Incluye la librería en tu proyecto PHP:</li>
+				</ol>
+				<code class="code">require_once 'path/to/EnvDebuggerPHP.php';</code>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Configuración</button>
+			<div class="content">
+				<p>Configura el entorno deseado utilizando el método <strong>start</strong> una sola vez por aplicación. Es aconsejable colocarlo al principio de tu aplicación (index.php).</p>
+				<code class="code">EnvDebuggerPHP::start('development');	// Inicia en entorno de desarrollo</code>
+				<code class="code">EnvDebuggerPHP::start('testing');		// Inicia en entorno de pruebas</code>
+				<code class="code">EnvDebuggerPHP::start('production');		// Inicia en entorno de producción</code>
+				<code class="code">EnvDebuggerPHP::start();					// Por defecto, inicia en entorno de producción</code>
+				<code class="code">EnvDebuggerPHP::start('debug');			// Inicia el modo debug, que no diferencia entre el entorno de desarrollo y pruebas</code>
+				<p>O desde un archivo de configuración:</p>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.json', 'variableName');	// Lee el entorno asignado a 'variableName' desde un archivo JSON</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.php', 'variableName');	// Lee el entorno asignado a 'variableName' desde un archivo PHP</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.txt', 'variableName');	// Lee el entorno asignado a 'variableName' desde un archivo TXT</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.xml', 'variableName');	// Lee el entorno asignado a 'variableName' desde un archivo XML</code>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Métodos de la clase DEBUG</button>
+			<div class="content">
+				<div class="method-title">DEBUG::error($message)</div>
+				<div class="method-desc">Registra un error en el archivo <strong>debugging/debug/error_log.txt</strong>.</div>
+				<div class="method-example">
+					<code>DEBUG::error('Error encontrado en debug');</code>
+				</div>
+				<div class="method-title">DEBUG::msg($message)</div>
+				<div class="method-desc">Muestra un mensaje en la pantalla.</div>
+				<div class="method-example">
+					<code>DEBUG::msg('Mensaje visible solo en modo debug');</code>
+				</div>
+				<div class="method-title">DEBUG::run(callable $function)</div>
+				<div class="method-desc">Ejecuta una función solo cuando se ha iniciado como <strong>debug</strong>.</div>
+				<div class="method-example">
+					<code>DEBUG::run(function() { echo 'Función ejecutada en modo debug'; });</code>
+				</div>
+				<div class="method-title">DEBUG::save($content, $file)</div>
+				<div class="method-desc">Guarda el contenido a un archivo en el directorio <strong>debugging/debug/</strong>, solo si se ha iniciado como <strong>debug</strong>.</div>
+				<div class="method-example">
+					<code>DEBUG::save('Hello, World', 'file.txt');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Métodos de la clase DEV</button>
+			<div class="content">
+				<div class="method-title">DEV::error($message)</div>
+				<div class="method-desc">Guarda un mensaje de error en el archivo <strong>debugging/dev/error_log.txt</strong> cuando estás en el entorno <strong>development</strong>.</div>
+				<div class="method-example">
+					<code>DEV::error('Error en el entorno de desarrollo');</code>
+				</div>
+				<div class="method-title">DEV::msg($message)</div>
+				<div class="method-desc">Muestra un mensaje en la pantalla con el archivo y la línea donde fue generado. Solo visible en el entorno <strong>development</strong>.</div>
+				<div class="method-example">
+					<code>DEV::msg('Mensaje visible en el entorno de desarrollo');</code>
+				</div>
+				<div class="method-title">DEV::run(callable $function)</div>
+				<div class="method-desc">Ejecuta una función solo cuando el entorno es <strong>development</strong>.</div>
+				<div class="method-example">
+					<code>DEV::run(function() { echo 'Función ejecutada en el entorno de desarrollo'; });</code>
+				</div>
+				<div class="method-title">DEV::save($content, $file)</div>
+				<div class="method-desc">Guarda el contenido en el directorio <strong>debugging/dev/</strong>, y solo se ejecuta en el entorno <strong>development</strong>.</div>
+				<div class="method-example">
+					<code>DEV::save('Hello, World', 'file.txt');</code>
+				</div>
+				<div class="method-title">DEV::set($environment)</div>
+				<div class="method-desc">Cambia el nombre del entorno actual que es <strong>development</strong>. Es recomendable hacerlo antes del método <strong>start</strong>.</div>
+				<div class="method-example">
+					<code>DEV::set('dev-env');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Métodos de la clase TEST</button>
+			<div class="content">
+				<div class="method-title">TEST::error($message)</div>
+				<div class="method-desc">Guarda un mensaje de error en el archivo <strong>debugging/test/error_log.txt</strong> cuando estás en el entorno <strong>testing</strong>.</div>
+				<div class="method-example">
+					<code>TEST::error('Error en el entorno de pruebas');</code>
+				</div>
+				<div class="method-title">TEST::msg($message)</div>
+				<div class="method-desc">Muestra un mensaje en la pantalla con el archivo y la línea donde fue generado. Solo visible en el entorno <strong>testing</strong>.</div>
+				<div class="method-example">
+					<code>TEST::msg('Mensaje visible en el entorno de pruebas');</code>
+				</div>
+				<div class="method-title">TEST::run(callable $function)</div>
+				<div class="method-desc">Ejecuta una función solo cuando el entorno es <strong>testing</strong>.</div>
+				<div class="method-example">
+					<code>TEST::run(function() { echo 'Función ejecutada en el entorno de pruebas'; });</code>
+				</div>
+				<div class="method-title">TEST::save($content, $file)</div>
+				<div class="method-desc">Guarda el contenido en el archivo dentro del directorio <strong>debugging/test/</strong>, solo se ejecuta cuando estás en el entorno <strong>testing</strong>.</div>
+				<div class="method-example">
+					<code>TEST::save('Hello, World', 'file.txt');</code>
+				</div>
+				<div class="method-title">TEST::set($environment)</div>
+				<div class="method-desc">Cambia el nombre del entorno actual que es <strong>testing</strong>. Se recomienda hacerlo antes del método <strong>start</strong>.</div>
+				<div class="method-example">
+					<code>TEST::set('test-env');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Métodos de la clase VARS</button>
+			<div class="content">
+				<div class="method-title">VARS::inc($name)</div>
+				<div class="method-desc">Incrementa el valor de una variable en 1.</div>
+				<div class="method-example">
+					<code>VARS::inc('contador');</code>
+				</div>
+				<div class="method-title">VARS::set($name, $value=null)</div>
+				<div class="method-desc">Define una variable con un valor específico. Si no se especifica un valor, la inicializa en <code>null</code>.</div>
+				<div class="method-example">
+					<code>VARS::set('miVariable', 'valor');</code>
+				</div>
+				<div class="method-title">VARS::toArray($name)</div>
+				<div class="method-desc">Obtiene el valor de una variable definida anteriormente y la convierte en un array. Si no existe, la crea como un array vacío.</div>
+				<div class="method-example">
+					<code>VARS::toArray('miVariable');</code>
+				</div>
+				<div class="method-title">VARS::toBool($name)</div>
+				<div class="method-desc">Obtiene el valor de una variable definida anteriormente y la convierte en un booleano. Si no existe, la crea con el valor <code>false</code>.</div>
+				<div class="method-example">
+					<code>VARS::toBool('miVariable');</code>
+				</div>
+				<div class="method-title">VARS::toFloat($name)</div>
+				<div class="method-desc">Obtiene el valor de una variable definida anteriormente y la convierte en un número flotante. Si no existe, la crea con el valor <code>0.0</code>.</div>
+				<div class="method-example">
+					<code>VARS::toFloat('miVariable');</code>
+				</div>
+				<div class="method-title">VARS::toInt($name)</div>
+				<div class="method-desc">Obtiene el valor de una variable definida anteriormente y la convierte en un número entero. Si no existe, la inicializa en <code>0</code>.</div>
+				<div class="method-example">
+					<code>VARS::toInt('miVariable');</code>
+				</div>
+				<div class="method-title">VARS::toObject($name)</div>
+				<div class="method-desc">Convierte el valor de una variable definida anteriormente en un objeto. Si no existe, la crea como un objeto vacío.</div>
+				<div class="method-example">
+					<code>VARS::toObject('miVariable');</code>
+				</div>
+				<div class="method-title">VARS::toString($name)</div>
+				<div class="method-desc">Convierte el valor de una variable definida anteriormente en una cadena. Si no existe, la crea como una cadena vacía.</div>
+				<div class="method-example">
+					<code>VARS::toString('miVariable');</code>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div data-lang="en" style="display: block;">
+		<section>
+			<button class="collapsible">Description</button>
+			<div class="content">
+				<p><strong>EnvDebuggerPHP</strong> is a library designed to simplify debugging and error handling in PHP across different environments such as development, testing, and production. It also allows you to efficiently identify errors and track variables.</p>
+				<p>Each environment is managed by a class to facilitate error handling and implementation:</p>
+				<ul>
+					<li>
+						<strong>development</strong>
+						<p>The development environment is the main stage where the entire project code is written.</p>
+						<p>The associated class is <code>DEV::</code></p>
+					</li>
+					<li>
+						<strong>testing</strong>
+						<p>The testing environment follows development and is where different types of tests are conducted before moving to production.</p>
+						<p>The associated class is <code>TEST::</code></p>
+					</li>
+					<li>
+						<strong>production</strong>
+						<p>The production environment is the final stage, the version seen by the end-user. There's no associated class because the library does not operate in production to prevent leaking sensitive data.</p>
+					</li>
+					<li>
+						<strong>debug</strong>
+						<p>Debug isn't technically an environment, but it is created for those who prefer not to separate development and testing stages, allowing them to test their code as they write it and later move it to production.</p>
+						<p>The associated class is <code>DEBUG::</code></p>
+					</li>
+				</ul> 
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Features</button>
+			<div class="content">
+				<ul>
+					<li>Custom error handling based on the environment.</li>
+					<li>Detailed messages and logs depending on the environment.</li>
+					<li>Compatible with JSON, XML, TXT, and PHP for environment configuration.</li>
+				</ul>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Installation</button>
+			<div class="content">
+				<ol>
+					<li>Download or clone the repository from <a href="#">EnvDebuggerPHP</a>.</li>
+					<li>Include the library in your PHP project:</li>
+				</ol>
+				<code class="code">require_once 'path/to/EnvDebuggerPHP.php';</code>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Configuration</button>
+			<div class="content">
+				<p>Configure the desired environment using the <strong>start</strong> method once per application. It is advisable to place it at the start of your application (index.php).</p>
+				<code class="code">EnvDebuggerPHP::start('development');	// Start in development environment</code>
+				<code class="code">EnvDebuggerPHP::start('testing');		// Start in testing environment</code>
+				<code class="code">EnvDebuggerPHP::start('production');	// Start in production environment</code>
+				<code class="code">EnvDebuggerPHP::start();					// By default, starts in production environment</code>
+				<code class="code">EnvDebuggerPHP::start('debug');			// Start in debug mode (combines development and testing)</code>
+				<p>Or load from a configuration file:</p>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.json', 'variableName');	// Reads the environment assigned to 'variableName' from a JSON file</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.php', 'variableName');	// Reads the environment assigned to 'variableName' from a PHP file</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.txt', 'variableName');	// Reads the environment assigned to 'variableName' from a TXT file</code>
+				<code class="code">EnvDebuggerPHP::start('path/to/file.xml', 'variableName');	// Reads the environment assigned to 'variableName' from an XML file</code>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Methods of the DEBUG class</button>
+			<div class="content">
+				<div class="method-title">DEBUG::error($message)</div>
+				<div class="method-desc">Logs an error to the <strong>debugging/debug/error_log.txt</strong> file.</div>
+				<div class="method-example">
+					<code>DEBUG::error('Error found in debug');</code>
+				</div>
+				<div class="method-title">DEBUG::msg($message)</div>
+				<div class="method-desc">Displays a message on the screen.</div>
+				<div class="method-example">
+					<code>DEBUG::msg('Message visible only in debug mode');</code>
+				</div>
+				<div class="method-title">DEBUG::run(callable $function)</div>
+				<div class="method-desc">Runs a function only when in <strong>debug</strong> mode.</div>
+				<div class="method-example">
+					<code>DEBUG::run(function() { echo 'Function executed in debug mode'; });</code>
+				</div>
+				<div class="method-title">DEBUG::save($content, $file)</div>
+				<div class="method-desc">Saves content to a file in the <strong>debugging/debug/</strong> directory. This function only runs in <strong>debug</strong> mode.</div>
+				<div class="method-example">
+					<code>DEBUG::save('Hello, World', 'file.txt');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Methods of the DEV class</button>
+			<div class="content">
+				<div class="method-title">DEV::error($message)</div>
+				<div class="method-desc">Logs an error to the <strong>debugging/dev/error_log.txt</strong> file when in the <strong>development</strong> environment.</div>
+				<div class="method-example">
+					<code>DEV::error('Error found in development environment');</code>
+				</div>
+				<div class="method-title">DEV::msg($message)</div>
+				<div class="method-desc">Displays a message on the screen with the file and line where it was generated. Only visible in the <strong>development</strong> environment.</div>
+				<div class="method-example">
+					<code>DEV::msg('Message visible in development environment');</code>
+				</div>
+				<div class="method-title">DEV::run(callable $function)</div>
+				<div class="method-desc">Runs a function only when the environment is <strong>development</strong>.</div>
+				<div class="method-example">
+					<code>DEV::run(function() { echo 'Function executed in development environment'; });</code>
+				</div>
+				<div class="method-title">DEV::save($content, $file)</div>
+				<div class="method-desc">Saves content to a file in the <strong>debugging/dev/</strong> directory. This function only runs in the <strong>development</strong> environment.</div>
+				<div class="method-example">
+					<code>DEV::save('Hello, World', 'file.txt');</code>
+				</div>
+				<div class="method-title">DEV::set($environment)</div>
+				<div class="method-desc">Changes the current environment name, which is <strong>development</strong>. It is recommended to do this before the <strong>start</strong> method.</div>
+				<div class="method-example">
+					<code>DEV::set('dev-env');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Methods of the TEST class</button>
+			<div class="content">
+				<div class="method-title">TEST::error($message)</div>
+				<div class="method-desc">Logs an error to the <strong>debugging/test/error_log.txt</strong> file when in the <strong>testing</strong> environment.</div>
+				<div class="method-example">
+					<code>TEST::error('Error found in testing environment');</code>
+				</div>
+				<div class="method-title">TEST::msg($message)</div>
+				<div class="method-desc">Displays a message on the screen with the file and line where it was generated. Only visible in the <strong>testing</strong> environment.</div>
+				<div class="method-example">
+					<code>TEST::msg('Message visible in testing environment');</code>
+				</div>
+				<div class="method-title">TEST::run(callable $function)</div>
+				<div class="method-desc">Runs a function only when the environment is <strong>testing</strong>.</div>
+				<div class="method-example">
+					<code>TEST::run(function() { echo 'Function executed in testing environment'; });</code>
+				</div>
+				<div class="method-title">TEST::save($content, $file)</div>
+				<div class="method-desc">Saves content to a file in the <strong>debugging/test/</strong> directory. This function only runs in the <strong>testing</strong> environment.</div>
+				<div class="method-example">
+					<code>TEST::save('Hello, World', 'file.txt');</code>
+				</div>
+				<div class="method-title">TEST::set($environment)</div>
+				<div class="method-desc">Changes the current environment name, which is <strong>testing</strong>. It is recommended to do this before the <strong>start</strong> method.</div>
+				<div class="method-example">
+					<code>TEST::set('test-env');</code>
+				</div>
+			</div>
+		</section>
+		<section>
+			<button class="collapsible">Methods of the VARS class</button>
+			<div class="content">
+				<div class="method-title">VARS::inc($name)</div>
+				<div class="method-desc">Increments the value of a variable by 1.</div>
+				<div class="method-example">
+					<code>VARS::inc('counter');</code>
+				</div>
+				<div class="method-title">VARS::set($name, $value=null)</div>
+				<div class="method-desc">Defines a variable with a specific value. If no value is provided, it initializes it as <code>null</code>.</div>
+				<div class="method-example">
+					<code>VARS::set('myVariable', 'value');</code>
+				</div>
+				<div class="method-title">VARS::toArray($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to an array. If it doesn't exist, it creates an empty array.</div>
+				<div class="method-example">
+					<code>VARS::toArray('myVariable');</code>
+				</div>
+				<div class="method-title">VARS::toBool($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to a boolean. If it doesn't exist, it creates it with the value <code>false</code>.</div>
+				<div class="method-example">
+					<code>VARS::toBool('myVariable');</code>
+				</div>
+				<div class="method-title">VARS::toFloat($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to a float. If it doesn't exist, it initializes it with the value <code>0.0</code>.</div>
+				<div class="method-example">
+					<code>VARS::toFloat('myVariable');</code>
+				</div>
+				<div class="method-title">VARS::toInt($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to an integer. If it doesn't exist, it initializes it with the value <code>0</code>.</div>
+				<div class="method-example">
+					<code>VARS::toInt('myVariable');</code>
+				</div>
+				<div class="method-title">VARS::toObject($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to an object. If it doesn't exist, it creates an empty object.</div>
+				<div class="method-example">
+					<code>VARS::toObject('myVariable');</code>
+				</div>
+				<div class="method-title">VARS::toString($name)</div>
+				<div class="method-desc">Gets the value of a previously defined variable and converts it to a string. If it doesn't exist, it creates an empty string.</div>
+				<div class="method-example">
+					<code>VARS::toString('myVariable');</code>
+				</div>
+			</div>
+		</section>
+	</div>
+	<footer>
+		<p data-lang="es" style="display: block;">© 2024 Geovanny Castelo. Todos los derechos reservados.</p>
+		<p data-lang="en" style="display: none;">© 2024 Geovanny Castelo. All rights reserved.</p>
+	</footer>
+</body>
+</html>
