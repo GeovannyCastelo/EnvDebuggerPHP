@@ -41,12 +41,12 @@
 
 document.addEventListener("DOMContentLoaded", function() {
     EnvDebuggerPHP.initialize().then(() => {
-        const code      = '__DEBUGGING_ERROR_CODE__';
-        const file      = '__DEBUGGING_ERROR_FILE__'; 
-        const line      = '__DEBUGGING_ERROR_LINE__'; 
-        const path      = '__DEBUGGING_ERROR_PATH__'; 
-        const title     = '__DEBUGGING_ERROR_TITLE__';
-        const message   = '__DEBUGGING_ERROR_MESSAGE__';
+        const code      = `__DEBUGGING_ERROR_CODE__`;
+        const file      = `__DEBUGGING_ERROR_FILE__`; 
+        const line      = `__DEBUGGING_ERROR_LINE__`; 
+        const path      = `__DEBUGGING_ERROR_PATH__`; 
+        const title     = `__DEBUGGING_ERROR_TITLE__`;
+        const message   = `__DEBUGGING_ERROR_MESSAGE__`;
         const existing  = document.querySelectorAll(`[id^='${EnvDebuggerPHP.ERROR_ID}']`);
         const id        = EnvDebuggerPHP.ERROR_ID + (existing.length + 1);
         let colors      = EnvDebuggerPHP.getEnvironmentColors(EnvDebuggerPHP.environment);

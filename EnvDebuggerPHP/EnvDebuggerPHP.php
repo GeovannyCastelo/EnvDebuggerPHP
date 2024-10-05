@@ -104,7 +104,8 @@ class EnvDebuggerPHP{
 
 	private static function checkPath($path){
 		self::method(__METHOD__);
-		return str_replace('\\', '/', $path);
+		$cleanedPath = preg_replace('/\(.+\).*$/', '', $path);
+		return str_replace('\\', '/', $cleanedPath);
 	}
 
 	private static function correctStart(){
@@ -237,6 +238,13 @@ class EnvDebuggerPHP{
 			error_log("---------------------------------------------------------------------" . PHP_EOL, 3, $path);
 		}
 	}
+	
+	private static function escapeForJavaScript($message) {
+		$message = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+		$message = str_replace('`', '\`', $message);
+		$message = str_replace('${', '\\${', $message);    
+		return $message;
+	}
 
 	private static function existsFile($environment=null){
 		self::method(__METHOD__);
@@ -269,7 +277,8 @@ class EnvDebuggerPHP{
 	}
 
 	private static function getFileName($path){
-		return basename($path);
+		$cleanedPath = preg_replace('/\(.+\).*$/', '', $path);
+		return basename($cleanedPath);
 	}
 
 	private static function getNameDirectory(){
@@ -805,32 +814,48 @@ class EnvDebuggerPHP{
 	public static function exceptionErrorHandler($severity, $message, $file, $line){
 		self::method(__METHOD__);
 		self::init();
+		$message = self::escapeForJavaScript($message);
 		if(!(error_reporting() & $severity)){
 			return;
 		}
 		switch ($severity) {
-			case E_USER_ERROR:
 			case E_ERROR:
-			case E_COMPILE_ERROR:
 			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
 			case E_RECOVERABLE_ERROR:
 				$title = 'FATAL ERROR';
 				break;
-			case E_USER_WARNING:
+
 			case E_WARNING:
-			case E_COMPILE_WARNING:
 			case E_CORE_WARNING:
+			case E_COMPILE_WARNING:
+			case E_USER_WARNING:
 				$title = 'WARNING';
 				break;
-			case E_USER_NOTICE:
+
+			case E_PARSE:
+				$title = 'PARSE ERROR';
+				break;
+
 			case E_NOTICE:
-			case E_STRICT:
+			case E_USER_NOTICE:
 				$title = 'NOTICE';
 				break;
+
+			case E_STRICT:
+				$title = 'STRICT STANDARDS';
+				break;
+
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				$title = 'DEPRECATED';
 				break;
+
+			case E_ALL:
+				$title = 'ALL ERRORS (E_ALL)';
+				break;
+
 			default:
 				$title = 'UNKNOWN ERROR';
 				break;
@@ -847,7 +872,6 @@ class EnvDebuggerPHP{
 			];
 			return self::echoReplaceFileJS(array_keys($searchReplace), array_values($searchReplace), $fileErrorPath);
 		}
-		self::errorLog("[$title] $message in $file on line $line");
 		if(in_array($severity, [E_USER_ERROR, E_ERROR, E_COMPILE_ERROR, E_CORE_ERROR, E_RECOVERABLE_ERROR])){
 			throw new ErrorException($message, 0, $severity, $file, $line);
 		}
@@ -859,18 +883,18 @@ class EnvDebuggerPHP{
 		if(self::$environments['production'] !== self::$environment){ 
 			$severity = $exception instanceof ErrorException ? $exception->getSeverity() : E_ERROR;
 			$fileErrorPath  = self::$pathMain.self::FILE_JS_ERROR;
+			$message = self::escapeForJavaScript($exception->getMessage());
 			$title = 'GENERATED ERROR';
 			$searchReplace = [
 				'__DEBUGGING_ERROR_CODE__' => $severity,
 				'__DEBUGGING_ERROR_FILE__' => self::getFileName(self::checkPath($exception->getFile())),
 				'__DEBUGGING_ERROR_LINE__' => $exception->getLine(),
-				'__DEBUGGING_ERROR_MESSAGE__'=> $exception->getMessage(),
+				'__DEBUGGING_ERROR_MESSAGE__'=> $message,
 				'__DEBUGGING_ERROR_PATH__' => self::checkPath($exception->getFile()),
 				'__DEBUGGING_ERROR_TITLE__' => $title
 			];
 			return self::echoReplaceFileJS(array_keys($searchReplace), array_values($searchReplace), $fileErrorPath);
 		}
-		self::errorLog($title . $exception->getMessage() . " in " . $exception->getFile() . " on line " . $exception->getLine());
 	}
 
 	public static function getEnvironment(){
