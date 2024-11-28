@@ -42,7 +42,10 @@
 document.addEventListener("DOMContentLoaded", function() {
 	EnvDebuggerPHP.initialize().then(() => {
 		EnvDebuggerPHP.createTitle();
-		EnvDebuggerPHP.adjustMargins();
-	});
-	
+		EnvDebuggerPHP.adjustTitle();
+	});	
+});
+
+window.addEventListener("resize", function() {
+	EnvDebuggerPHP.adjustTitle();
 });

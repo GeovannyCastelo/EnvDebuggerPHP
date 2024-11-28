@@ -71,8 +71,10 @@ class TEnvDebuggerPHP {
 		this.VARIABLES_TITLE	= value.VARIABLES_TITLE;
 		this.TITLE_TITLE		= value.TITLE_TITLE;
 
-		this.MAX_BAR_HEIGHT = 300; 
-		this.MIN_BAR_HEIGHT = 200; 
+		this.screenWidth = 800;
+		
+		this.MAX_BAR_HEIGHT = 270; 
+		this.MIN_BAR_HEIGHT = 100; 
 		this.MAX_BAR_WIDTH = 300; 
 		this.MIN_BAR_WIDTH = 200; 
 
@@ -91,6 +93,9 @@ class TEnvDebuggerPHP {
 			"title-border": "rgba(255, 0, 0, 1)",
 			"title-color": "#ffffff"
 		};
+		
+		this.titleStyle = '';
+		this.titleWidth = '';
 	}
 
 	adjustChildrenHeights(container, environments, errors, messages, variables, totalHeight = null) {
@@ -128,7 +133,7 @@ class TEnvDebuggerPHP {
 		let variablesContainer = document.getElementById(this.VARIABLES_ID);
 		if (!mainContainer || !environmentsContainer || !messagesBodyContainer || !variablesBodyContainer || !errorsBodyContainer) return;
 		environmentsContainer.style.height = 'auto';
-		if (window.innerWidth > 800) {
+		if (window.innerWidth > this.screenWidth) {
 			this.applyStylesForWideScreens(mainContainer);
 			const width = this.getContainerWidth();
 			mainContainer.style.width = width + "px";
@@ -158,6 +163,26 @@ class TEnvDebuggerPHP {
 					element.style.marginTop = (parseInt(marginTop) + height) + 'px';
 				}
 			});
+		}
+	}
+	
+	adjustTitle(click=false) {
+		const title = document.getElementById(this.TITLE_ID);
+		const container = document.getElementById(this.CONTAINER_ID);
+		if (title && container) {
+			const currentWidth = title.style.width;
+			const containerWidth = container.offsetWidth + "px";
+			if (window.innerWidth > this.screenWidth) {
+				if(click){									
+					const style = currentWidth === containerWidth?'max':'min';
+					const width = currentWidth === containerWidth?"100%":containerWidth;
+					this.titleStyle = style;					
+					this.titleWidth = width;
+				}
+				this.titleStyles(this.titleStyle,title,container,this.titleWidth);								
+			}else{
+				this.titleStyles('bottom',title, container,'auto');
+			}			
 		}
 	}
 
@@ -205,7 +230,7 @@ class TEnvDebuggerPHP {
 	}
 
 	applyStylesForWideScreens(container) {
-		this.adjustContainerDimensions(container, "44px", "6px", "6px", this.getContainerWidth() + "px");
+		this.adjustContainerDimensions(container, "50px", "6px", "6px", this.getContainerWidth() + "px");
 	}
 
 	clearVariableTable() {
@@ -267,12 +292,12 @@ class TEnvDebuggerPHP {
 		const container = document.createElement("div");
 		container.id = this.CONTAINER_ID;
 		container.style.position = "fixed";
-		container.style.top = "44px";
+		container.style.top = "50px";
 		container.style.right = "6px";
 		container.style.bottom = "6px";
 		container.style.width = "20%";
 		container.style.minWidth = this.MIN_BAR_WIDTH;
-		container.style.minWidth = this.MIN_BAR_HEIGHT;
+		container.style.minHeight = this.MIN_BAR_HEIGHT;
 		container.style.backgroundColor = "transparent";
 		container.style.border = "none";
 		container.style.padding = "0";
@@ -320,7 +345,7 @@ class TEnvDebuggerPHP {
 				break;
 		}
 		setTimeout(() => {
-			this.createSectionCloseButton(`${id}-TITLE`, `${id}-BODY`, colors);
+			this.createSectionCloseButton(`${id}-TITLE`, `${id}-BODY`, colors, id==this.ENVIRONMENTS_ID?'block':'none',id==this.ENVIRONMENTS_ID);
 		}, 0);
 		return container;
 	}
@@ -338,6 +363,8 @@ class TEnvDebuggerPHP {
 		container.style.marginBottom = "0";
 		container.style.marginTop = "0";
 		container.style.boxShadow = "inset 0 0 3px rgba(0, 0, 0, 0.1)";
+		container.style.minHeight = 'fit-content';
+		container.style.minWidth  = 'auto';		
 		container.style.overflowX = id === this.ERRORS_ID || id === this.MESSAGES_ID || id === this.VARIABLES_ID ? 'auto' : 'hidden';
 		container.style.overflowY = id === this.ERRORS_ID || id === this.MESSAGES_ID || id === this.VARIABLES_ID ? 'auto' : 'hidden';
 		container.style.height = id === this.ERRORS_ID || id === this.MESSAGES_ID || id === this.VARIABLES_ID ? '150px' : 'auto';
@@ -347,11 +374,11 @@ class TEnvDebuggerPHP {
 		return container;
 	}
 
-	createSectionCloseButton(idTitle, idBody, colors) {
+	createSectionCloseButton(idTitle, idBody, colors, display, active) {
 		const button = document.createElement("button");
 		const body = document.getElementById(idBody);
 		const title = document.getElementById(idTitle);
-		button.textContent = "-";
+		button.textContent = active?"-":"+";
 		button.style.fontSize = "18px";
 		button.style.height = "20px";
 		button.style.width = "20px";
@@ -369,7 +396,7 @@ class TEnvDebuggerPHP {
 		if (title) {
 			title.appendChild(button);
 			if (body) {
-				body.style.display = "block";
+				body.style.display = display;
 				button.addEventListener("click", function () {
 					if (body.style.display === "none") {
 						body.style.display = "block";
@@ -503,88 +530,107 @@ class TEnvDebuggerPHP {
 	}
 	
 	createTitle() {
-	const colors = this.getEnvironmentColors(this.environment);
-	if (!document.getElementById(this.TITLE_ID)) {
-		const div = document.createElement("div");
-		div.id = this.TITLE_ID;
-		div.style.position = "fixed";
-		div.style.top = "0";
-		div.style.left = "6px";
-		div.style.right = "6px";
-		div.style.backgroundColor = colors["background"];
-		div.style.border = `1px solid ${colors["border"]}`;
-		div.style.color = colors["color"];
-		div.style.textAlign = "center";
-		div.style.padding = "8px";
-		div.style.zIndex = "2147483647";
-		div.style.fontSize = "16px";
-		div.style.fontWeight = "bold";
-		div.style.fontFamily = "Arial, sans-serif";
-		div.style.overflowX = "hidden";
-		div.style.overflowY = "hidden";
-		div.style.maxHeight = "40px";
-		const leftLink = document.createElement("a");
-		leftLink.href = "www.geocys.com/EnvDebuggerPHP";
-		leftLink.style.position = "absolute";
-		leftLink.style.left = "10px";
-		leftLink.style.color = colors["color"];
-		leftLink.style.textDecoration = "none";
-		leftLink.style.display = "flex";
-		leftLink.style.alignItems = "center";
-		const iconSvg = document.createElement("span");
-		iconSvg.style.marginTop = "-3px";
-		iconSvg.innerHTML = `
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="26px" height="26px">
-				<ellipse cx="50" cy="60" rx="20" ry="25" fill="${colors["color"]}" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="50" y1="35" x2="50" y2="85" stroke="${colors["color"]}" stroke-width="2" />
-				<circle cx="40" cy="50" r="3" fill="${colors["color"]}" />
-				<circle cx="40" cy="60" r="3" fill="${colors["color"]}" />
-				<circle cx="40" cy="70" r="3" fill="${colors["color"]}" />
-				<circle cx="60" cy="50" r="3" fill="${colors["color"]}" />
-				<circle cx="60" cy="60" r="3" fill="${colors["color"]}" />
-				<circle cx="60" cy="70" r="3" fill="${colors["color"]}" />
-				<circle cx="50" cy="30" r="10" fill="${colors["color"]}" />
-				<circle cx="46" cy="28" r="2" fill="${colors["color"]}" />
-				<circle cx="54" cy="28" r="2" fill="${colors["color"]}" />
-				<line x1="30" y1="55" x2="20" y2="45" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="30" y1="65" x2="20" y2="75" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="70" y1="55" x2="80" y2="45" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="70" y1="65" x2="80" y2="75" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="44" y1="22" x2="38" y2="15" stroke="${colors["color"]}" stroke-width="2" />
-				<line x1="56" y1="22" x2="62" y2="15" stroke="${colors["color"]}" stroke-width="2" />
-			</svg>`;
-		const leftText = document.createElement("span");
-		leftText.style.fontSize = "12px";
-		leftText.textContent = "EnvDebuggerPHP";
-		leftLink.appendChild(iconSvg);
-		leftLink.appendChild(leftText);
-		const rightLink = document.createElement("a");
-		rightLink.href = this.PATH_FILE_HELP;
-		rightLink.textContent = "help";
-		rightLink.style.position = "absolute";
-		rightLink.style.fontSize = "12px";
-		rightLink.style.right = "10px";
-		rightLink.style.marginTop = "3px";
-		rightLink.style.color = colors["color"];
-		rightLink.style.textDecoration = "none";
-		div.appendChild(leftLink);
-		div.appendChild(rightLink);
-		const titleText = document.createElement("span");
-		titleText.textContent = this.TITLE_TITLE;
-		div.appendChild(titleText);
-		document.body.insertAdjacentElement("afterbegin", div);
-		const debugHeight = div.offsetHeight;
-		document.body.style.marginTop = debugHeight + "px";
+		const colors = this.getEnvironmentColors(this.environment);
+		const containerWidth = this.getContainerWidth();
+		const id = this.TITLE_ID;
+		if (!document.getElementById(this.TITLE_ID)) {
+			const div = document.createElement("div");
+			this.titleStyle = 'min';
+			this.titleWidth = containerWidth<this.MIN_BAR_WIDTH?this.MIN_BAR_WIDTH:containerWidth+"px";
+			div.id = id;
+			div.style.position = "fixed";
+			div.style.top = "0";
+			div.style.left = "auto";
+			div.style.right = "6px";
+			div.style.width = containerWidth<this.MIN_BAR_WIDTH?this.MIN_BAR_WIDTH:containerWidth+"px";
+			div.style.backgroundColor = colors["background"];
+			div.style.border = `1px solid ${colors["border"]}`;
+			div.style.color = colors["color"];
+			div.style.textAlign = "center";
+			div.style.padding = "8px";
+			div.style.zIndex = "2147483647";
+			div.style.fontSize = "16px";
+			div.style.fontWeight = "bold";
+			div.style.fontFamily = "Arial, sans-serif";
+			div.style.overflowX = "hidden";
+			div.style.overflowY = "hidden";
+			div.style.maxHeight = "40px";
+			div.style.transition = "width 0.3s ease-in-out, left 0.3s ease-in-out, right 0.3s ease-in-out";
+			const leftLink = document.createElement("a");
+			leftLink.href = "www.geocys.com/EnvDebuggerPHP";
+			leftLink.id = `${id}-ALEFT`;
+			leftLink.style.position = "absolute";
+			leftLink.style.left = "10px";
+			leftLink.style.color = colors["color"];
+			leftLink.style.textDecoration = "none";
+			leftLink.style.display = "flex";
+			leftLink.style.alignItems = "center";
+			const iconSvg = document.createElement("span");
+			iconSvg.style.marginTop = "-3px";
+			iconSvg.innerHTML = `
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="26px" height="26px">
+					<ellipse cx="50" cy="60" rx="20" ry="25" fill="${colors["color"]}" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="50" y1="35" x2="50" y2="85" stroke="${colors["color"]}" stroke-width="2" />
+					<circle cx="40" cy="50" r="3" fill="${colors["color"]}" />
+					<circle cx="40" cy="60" r="3" fill="${colors["color"]}" />
+					<circle cx="40" cy="70" r="3" fill="${colors["color"]}" />
+					<circle cx="60" cy="50" r="3" fill="${colors["color"]}" />
+					<circle cx="60" cy="60" r="3" fill="${colors["color"]}" />
+					<circle cx="60" cy="70" r="3" fill="${colors["color"]}" />
+					<circle cx="50" cy="30" r="10" fill="${colors["color"]}" />
+					<circle cx="46" cy="28" r="2" fill="${colors["color"]}" />
+					<circle cx="54" cy="28" r="2" fill="${colors["color"]}" />
+					<line x1="30" y1="55" x2="20" y2="45" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="30" y1="65" x2="20" y2="75" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="70" y1="55" x2="80" y2="45" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="70" y1="65" x2="80" y2="75" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="44" y1="22" x2="38" y2="15" stroke="${colors["color"]}" stroke-width="2" />
+					<line x1="56" y1="22" x2="62" y2="15" stroke="${colors["color"]}" stroke-width="2" />
+				</svg>`;
+			const leftText = document.createElement("span");
+			leftText.style.fontSize = "12px";
+			leftText.textContent = "EnvDebuggerPHP";
+			leftLink.appendChild(iconSvg);
+			leftLink.appendChild(leftText);
+			const rightLink = document.createElement("a");
+			rightLink.id = `${id}-ARIGHT`;
+			rightLink.href = this.PATH_FILE_HELP;
+			rightLink.textContent = "help";
+			rightLink.style.position = "absolute";
+			rightLink.style.fontSize = "12px";
+			rightLink.style.right = "50px";
+			rightLink.style.marginTop = "3px";
+			rightLink.style.color = colors["color"];
+			rightLink.style.textDecoration = "none";
+			rightLink.style.opacity = "0";
+			const minimizeButton = document.createElement("button");
+			minimizeButton.textContent = "−";
+			minimizeButton.style.position = "absolute";
+			minimizeButton.style.right = "10px";
+			minimizeButton.style.fontSize = "12px";
+			minimizeButton.style.backgroundColor = colors["background"];
+			minimizeButton.style.color = colors["color"];
+			minimizeButton.style.border = `1px solid ${colors["border"]}`;
+			minimizeButton.style.cursor = "pointer";
+			minimizeButton.addEventListener("click", () => {
+				this.adjustTitle(true);
+			});
+			div.appendChild(leftLink);
+			div.appendChild(rightLink);
+			div.appendChild(minimizeButton);
+			const titleText = document.createElement("span");
+			titleText.id = `${id}-SPAN`;
+			titleText.textContent = this.TITLE_TITLE;
+			titleText.style.opacity = "0";
+			titleText.style.marginRight = "32px";
+			div.appendChild(titleText);
+			document.body.insertAdjacentElement("afterbegin", div);
+		}
 	}
-}
-
-
-
 
 	getContainerWidth() {
-		const screenWidth = window.innerWidth;
-		let width = parseInt(screenWidth * 0.10);
-		if (screenWidth <= 1000) {
+		let width = parseInt(window.innerWidth * 0.10);
+		if (window.innerWidth <= this.screenWidth) {
 			width = this.MIN_BAR_WIDTH;
 		} else if (width > this.MAX_BAR_WIDTH) {
 			width = this.MAX_BAR_WIDTH;
@@ -664,14 +710,55 @@ class TEnvDebuggerPHP {
 		this.adjustContainerDimensions(container, "auto", "0", "6px", "100%", `${this.MAX_BAR_HEIGHT}px`, 'auto');
 	}
 
-   async updateVariableValues() {
+	titleStyles(style, title, container, width) {
+		if (title && container) {
+			title.style.width = width;
+			const links = title.querySelectorAll('a[id*="ARIGHT"]');
+			const button = title.querySelector("button");
+			const span = title.querySelector("span[id]");
+			if (style === 'bottom') {
+				title.style.top = "auto";
+				title.style.left = "6px";
+				title.style.right = "6px";
+				title.style.bottom = (this.MAX_BAR_HEIGHT + 15) + "px";
+				if (button) {
+					button.disabled = true;
+					button.style.opacity = "0";
+				}
+				links.forEach(link => link.style.opacity = "0");
+				if (span) span.style.opacity = "0";
+			} else {
+				title.style.top = "0";
+				title.style.left = "auto";
+				title.style.right = "6px";
+				title.style.bottom = "auto";
+				if (button) {
+					button.disabled = false;
+					button.style.opacity = "1";
+				}
+				switch (style) {
+					case 'max':
+						button.textContent = "-";
+						links.forEach(link => link.style.opacity = "1");
+						if (span) span.style.opacity = "1";
+						break;
+					case 'min':
+						button.textContent = "+";
+						links.forEach(link => link.style.opacity = "0");
+						if (span) span.style.opacity = "0";
+						break;
+				}
+			}
+		}
+	}
+
+	async updateVariableValues() {
 		try {
 			this.clearVariableTable();
 			const response = await fetch(this.PATH_FILE_VARS);
 			if (!response.ok) {
 				throw new Error('Could not access the file');
 			}
-
 			const data = await response.json();
 			if (data && Array.isArray(data) && data.length > 0) {
 				data.forEach(variable => this.loadVariable(variable));
