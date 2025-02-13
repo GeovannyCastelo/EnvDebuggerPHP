@@ -1,0 +1,10 @@
+{
+    "title": "EnvDebuggerPHP",
+    "type": "library",
+    "version": "1.0",
+    "src": "libraryEnvDebuggerPHP10/info.webp",
+    "update": "01-01-2025",
+    "url": "",
+    "info": "<p><strong>EnvDebuggerPHP</strong> is a powerful PHP library designed to streamline debugging and error handling across different environments like development, testing, and production. It helps you efficiently track variables and identify errors, adapting to each stage of your project's lifecycle.</p><hr class='my-4'><h2 class='fw-bold'><span>🚀</span> Features</h2><ul><li><span>🎯</span> <strong>Custom error handling</strong> tailored to each environment.</li><li><span>🛠</span> <strong>Detailed messages and logs</strong> for better error tracking.</li><li><span>⚙</span> <strong>Compatible with JSON, XML, TXT, and PHP</strong> for easy configuration.</li></ul>",
+    "website": "www.geocys.com"
+}

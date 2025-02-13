@@ -112,7 +112,7 @@ class TEnvDebuggerPHP {
 		container.style.marginRight = right;
 	}
 
-	adjustContainerDimensions(container, top, right, bottom, width, height = 'auto', overflowY = 'hidden') {
+	adjustContainerDimensions(container, top, right, bottom, width, height = 'fit-content', overflowY = 'hidden') {
 		container.style.position = "fixed";
 		container.style.top = top;
 		container.style.right = right;

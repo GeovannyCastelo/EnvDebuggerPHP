@@ -693,7 +693,7 @@ class EnvDebuggerPHP{
 		error_log("---------------------------------------------------------------------" . PHP_EOL, 3, $path);
 	}
 
-	protected static function setMessage($message, $environment = null, $trace){
+	protected static function setMessage($message, $environment = null, $trace = null){
 		self::method(__METHOD__);
 		self::init();
 		$file = '';
